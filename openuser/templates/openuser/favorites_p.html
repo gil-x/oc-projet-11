@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+{% block title %}Mes favoris{% endblock %}
+
+{% block content %}
+<header class="masthead text-center text-white d-flex">
+    <div id="products-list" class="favorites-container">
+        <div id="products-list-head">
+            <h1>Mes favoris</h1>
+        </div>
+        {% for favorite in favorites_p %}
+        <div class="product">
+            <div class="grade-{{ favorite.grade }}">
+                <p><strong>{{ favorite.product_name }}</strong></p>
+                <img src={{ favorite.product_img_url }} alt="" title="" />
+                <p><a href={% url 'product_view' pk=favorite.id %}>» Fiche produit</a></p>
+                <br>
+                <p><button class="favorite-remove btn btn-danger" product_id={{ favorite.id }}>Retirer des favoris</button></p>
+            </div>
+        </div>
+    {% endfor %}
+
+    <div class="pagination">
+        <span>
+            {% if favorites_p.has_previous %}
+                <a href="?page={{ favorites_p.previous_page_number }}">Page précédente</a>
+            {% endif %}
+        </span>
+        <span class="current">
+                Page {{ favorites_p.number }} sur {{ favorites_p.paginator.num_pages }}
+        </span>
+        <span>
+            {% if favorites_p.has_next %}
+                <a href="?page={{ favorites_p.next_page_number }}">Page suivante</a>
+            {% endif %}
+        </span>
+    </div>
+    </div>
+</header>
+{% endblock %}
+
+{% block extra_js %}
+<script type="text/javascript">
+  $('.favorite-remove').click(function(){
+  var product_id;
+  product_id = $(this).attr("product_id");
+  console.log("product_id: " + product_id);
+  var favorite = $(this).closest('.product');
+  console.log(favorite);
+  $.ajax(
+  {
+      type:"GET",
+      url: base_url + "/mon-espace/remove-product/" + product_id + "/",
+      success: function() {
+        console.log("Deleted!");
+        favorite.remove();
+      }
+   })
+});
+</script>
+{% endblock extra_js %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

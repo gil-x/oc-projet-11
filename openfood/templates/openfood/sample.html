@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block title %}Un produit au pif issu de la base de Pur Beurre{% endblock %}
+
+{% block content %}
+<h2>Un produit E au pif :</h2>
+<p>{{ product_e.product_name }} (Grade {{ product_e.grade|upper }})</p>
+<br>
+<h2>Ses catégories :</h2>
+<ul>
+    {% for category, rank in product_e_cats_and_rank %}
+    <li>{{ category }} - {{ rank }}</li>
+    {% endfor %}
+</ul>
+<br>
+<h2>Un produit A ou B au pif :</h2>
+<ul>
+    {% for substitute in substitutes %}
+    <li>{{ substitute }} - {{ substitute.grade|upper }}</li>
+    {% endfor %}
+</ul>
+
+{% endblock %}

@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}Créer un compte{% endblock %}
+
+{% block content %}
+
+
+{% if error %}
+<p><strong>Erreur queque part...</strong></p>
+{% endif %}
+
+
+<header id="account-header" class="masthead text-center text-white d-flex">
+    <div class="container my-auto">
+        <div id="home-search-block" class="row">
+            <div id="login-box" class="col-lg-10 mx-auto">
+            {% if user.is_authenticated %}
+                <h1>Bonjour {{ user.username }} !</h1>
+            {% else %}
+                <h1 class="text-uppercase"><strong>Créer un compte</strong></h1>
+                <hr>
+                <form method="post" action=".">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <input class="btn btn-primary btn-xl js-scroll-trigger" type="submit" value="Créer le compte" />
+            </form>
+            {% endif %}
+            </div>
+        </div>
+    </div>
+</header>
+
+{% endblock %}

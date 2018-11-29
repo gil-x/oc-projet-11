@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}Connexion{% endblock %}
+
+{% block content %}
+
+
+<header id="account-header" class="masthead text-center text-white d-flex">
+    <div class="container my-auto">
+      <div id="home-search-block" class="row">
+        <div class="col-lg-10 mx-auto">
+          <h1 class="text-uppercase"><strong>Mon compte</strong></h1>
+          <hr>
+        </div>
+        <div id="login-box" class="col-lg-10 mx-auto">
+            <p>Nom d'utilisateur : <strong>{{ user.username }}</strong></p>
+            <p>Email : <strong>{{ user.email }}</strong></p>
+            <!-- {{ user.firstname }}
+            {{ user.lastname }} -->
+            {% if favorites_number > 0 %}
+            <p>Vous avez actuellement <a href="{% url 'user_favorites' %}">{{ favorites_number }} produits favoris</a> enregistrés.</p>
+            {% else %}
+            <p>Vous n'avez pas encore de produits favoris, c'est dommage !<br>
+                Essayez notre <a href="{% url 'search_product' %}">moteur de recherche</a>, ou <a href="{% url 'ramdom_product' %}">laissez-vous surprendre pas le hasard...</a></p>
+            {% endif %}
+        </div>
+      </div>
+    </div>
+</header>
+
+
+
+{% endblock %}

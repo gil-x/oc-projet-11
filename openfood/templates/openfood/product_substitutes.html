@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+{% block title %}Au hasard !{% endblock %}
+
+{% block content %}
+
+<header id="product-header" class="masthead text-center text-white d-flex">
+<div id="products-list">
+    <div id="products-list-head"  class="grade-{{ product.grade }}">
+        <h1>On remplace !</h1>
+        <p>Pour arrêter de consommer <strong>{{ product.product_name }}</strong>, de grade <strong>{{ product.grade|upper }}</strong>, Pur Beurre et Open Food Facts vous proposent...</p>
+        <a id="refresh-link" href="{{ request.get_full_path }}">
+            <img src="{% static 'img/refresh.svg' %}" alt="Charger de nouveaux produits !" title="Charger de nouveaux produits !" /><strong>Charger de nouveaux produits !</strong>
+        </a>
+    </div>
+    
+{% if substitutes %}
+    {% for substitute in substitutes %}
+    <div class="product">
+        <div class="grade-{{ substitute.grade }}">
+            <p><strong class="product-name">{{ substitute.product_name }}</strong></p>
+            <img src="{{ substitute.product_img_url }}" alt="{{ substitute.product_name }}" title="{{ substitute.product_name }}" />
+            <p><a href={% url 'product_view' pk=substitute.id %}>» Fiche produit</a></p>
+            {% if user.is_authenticated %}
+            <p><button class="favorite-add btn btn-warning" product_id={{ substitute.id }}>Ajouter aux favoris</button></p>
+            {% else %}
+            <p><button class="favorite-add-disabled btn btn-secondary" product_id={{ substitute.id }}>Ajouter aux favoris</button></p>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+
+{% else %}
+    <p>Aucun produit trouvé</p>
+{% endif %}
+</div>
+</header>
+
+
+
+
+
+
+
+<div id="maybe-create-account">
+    <div>
+        <h2 class="text-uppercase"><strong>Pas encore de compte sur&nbsp;Pur&nbsp;Beurre ?</strong></h2>
+        <p>Du coup, vous ne pouvez pas enregistrer vos aliments favoris... :-(</p>
+        <p>Souhaitez-vous créer un compte maintenant ?</p>
+        <button class="yes-i-want btn btn-success">Oui ! Je veux créer un compte !</button>
+        <button class="already-user btn btn-info">j'ai déjà un compte, je me connecte</button><br><br>
+        <button class="no-thanks btn btn-secondary">Non merci, je continue à visiter comme ça</button>
+    </div>
+</div>
+
+
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script type="text/javascript">
+$('.favorite-add').click(function(){
+    var product_id;
+    button= $(this);
+    product_id = $(this).attr("product_id");
+    console.log("product_id: " + product_id);
+    $.ajax(
+    {
+        type:"GET",
+        url: base_url + "/mon-espace/add-product/" + product_id + "/",
+        success: function() {
+            console.log("Added!");
+            button.text("Ajouté aux favoris");
+            button.removeClass('favorite-add');
+            button.removeClass('btn-warning');
+            button.addClass('favorite-added');
+            button.addClass('btn-success');
+        }
+    })
+});
+$('.favorite-add-disabled').click(function(){
+    var product_id;
+    $('#maybe-create-account').slideToggle();
+    button= $(this);
+    product_id = $(this).attr("product_id");
+    console.log("product_id: " + product_id);
+});
+$('.yes-i-want').click(function(){
+    window.location.href = "{% url 'registration' %}";
+});
+$('.already-user').click(function(){
+    window.location.href = "{% url 'log_in' %}";
+});
+$('.no-thanks').click(function(){
+    $('#maybe-create-account').slideToggle();
+});
+
+</script>
+{% endblock extra_js %}

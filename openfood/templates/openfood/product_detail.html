@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+{% block title %}{{ product.product_name }}{% endblock %}
+
+{% block content %}
+
+<header class="masthead text-center text-white d-flex">
+    <div class="container my-auto">
+        <div id="product">
+            <h1>{{ product.product_name }}</h1>
+            <div id="product-image">
+                <img src="{{ product.product_img_url }}" alt="{{ product.product_name }}" title="{{ product.product_name }}" />
+            </div>
+            <div id="product-description">
+                <p><strong>{{ product.product_name }} ({{ product.grade|upper }})</strong></p>
+                {% with 'img/grade_'|add:product.grade|add:'.png' as grade_image %}
+                <p><img class="grade" src="{% static grade_image %}" alt="{{ product.grade|upper }}" title="{{ product.grade|upper }}" /></p>
+                {% endwith %}
+                <p><strong> Marque : </strong>{{ product.brand }}</p>
+                <p><small>En vente à {{ product.store }}.</small></p>
+                <p><a href="{{ product.url }}" target="_blank">» Voir sur OpenFoodFacts.org</a></p>
+                {% if product.favorized != 0 %}
+                    <p>Ce produit est apprécié par {{ product.favorized }} membre(s).</p>
+                {% endif %}
+                {% if user.is_authenticated %}
+                    {% if fav %}
+                    <p><button class="favorite-remove btn btn-danger" product_id={{ product.id }}>Retirer des favoris</button></p>
+                    {% else %}
+                    <p><button class="favorite-add btn btn-primary" product_id={{ product.id }}>Ajouter aux favoris</button></p>
+                    {% endif %}
+                {% else %}
+                <p><button class="favorite-add-disabled btn btn-secondary" product_id={{ product.id }}>Ajouter aux favoris</button></p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</header>
+
+<div id="maybe-create-account">
+    <div>
+        <h2 class="text-uppercase"><strong>Pas encore de compte sur&nbsp;Pur&nbsp;Beurre ?</strong></h2>
+        <p>Du coup, vous ne pouvez pas enregistrer vos aliments favoris... :-(</p>
+        <p>Souhaitez-vous créer un compte maintenant ?</p>
+        <button class="yes-i-want btn btn-success">Oui ! Je veux créer un compte !</button><br>
+        <button class="no-thanks btn btn-warning">Non merci, je continue à visiter comme ça.</button>
+    </div>
+</div>
+
+</div> <!-- what's that tag? -->
+
+{% endblock %}
+
+{% block extra_js %}
+<script type="text/javascript">
+
+$('.favorite-add').click(function(){
+    var product_id, button;
+    button= $(this);
+    product_id = $(this).attr("product_id");
+    console.log("product_id: " + product_id);
+    $.ajax(
+    {
+        type:"GET",
+        url: base_url + "/mon-espace/add-product/" + product_id + "/",
+        success: function() {
+            console.log("Added!");
+            button.text("Retirer des favoris");
+            button.removeClass('favorite-add btn btn-primary');
+            button.addClass('favorite-remove btn btn-danger');
+        }
+    })
+});
+
+
+
+$('.favorite-add-disabled').click(function(){
+    var product_id;
+    $('#maybe-create-account').slideToggle();
+    button= $(this);
+    product_id = $(this).attr("product_id");
+    console.log("product_id: " + product_id);
+});
+
+
+
+$('.yes-i-want').click(function(){
+    window.location.href = "{% url 'log_in' %}";
+});
+$('.no-thanks').click(function(){
+    $('#maybe-create-account').slideToggle();
+});
+
+
+$('.favorite-remove').click(function(){
+    var product_id, button;
+    button= $(this);
+    product_id = $(this).attr("product_id");
+    console.log("product_id: " + product_id);
+    var favorite = $(this).closest('.product');
+    console.log(favorite);
+    console.log("push!");
+    $.ajax(
+    {
+        type:"GET",
+        url: base_url + "/mon-espace/remove-product/" + product_id + "/",
+        success: function() {
+            console.log("Deleted!");
+            favorite.remove();
+            button.text("Ajouter aux favoris");
+            button.removeClass('favorite-remove');
+            button.addClass('favorite-add btn btn-primary');
+        }
+     })
+  });
+
+
+
+</script>
+{% endblock extra_js %}

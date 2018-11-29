@@ -1,0 +1,55 @@
+* {
+    margin: 0;
+    padding: 0;
+    color: #252525;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 1.1rem;
+}
+body {
+    padding: 0vw 20vw;
+}
+h1 {
+    padding: 1vw;
+    background: rgba(200, 255, 0, 0.45);
+    margin: 0.5vw 0;
+}
+
+nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    /* list-style-type: none; */
+    background: rgba(0, 155, 255, 0.35);
+}
+
+
+nav * {
+    font-size: 0.9em;
+    list-style-type: none;
+    margin: 10px;
+}
+
+#account {
+    padding: 1vw;
+    background: #CC3300;
+}
+#account * {
+    color: #FFF;
+}
+
+#content {
+    padding: 1vw;
+    margin-top: 0.5vw;
+    background: rgba(255, 255, 0, 0.1);
+    border: 1px dashed #CCC;
+}
+
+.favorite {
+    padding: 1vw;
+    margin-bottom: 10px;
+    background: rgba(225, 125, 0, 0.35)
+}
+
+#id_search {
+    width: 100%;
+}
