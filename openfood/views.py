@@ -106,9 +106,9 @@ def ramdom_product(request):
     return render(request, 'openfood/product_substitutes.html', context)
 
 
-def product_detail(request, id):
+def product_detail(request, pk):
     context = {}
-    context["product"] = get_object_or_404(Product, pk=id)
+    context["product"] = get_object_or_404(Product, pk=pk)
 
     if request.user.is_authenticated:
          if context["product"] in request.user.profile.products.all():
