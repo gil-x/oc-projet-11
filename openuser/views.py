@@ -101,7 +101,8 @@ def signup(request):
                         mail_subject, message, to=[to_email]
             )
             email.send()
-            return HttpResponse('Please confirm your email address to complete the registration')
+            # return HttpResponse('Please confirm your email address to complete the registration')
+            return render(request, 'openuser/confirmation.html')
     else:
         form = SignupForm()
     return render(request, 'signup.html', {'form': form})
@@ -117,9 +118,11 @@ def activate(request, uidb64, token):
         user.save()
         login(request, user)
         # return redirect('home')
-        return HttpResponse('Thank you for your email confirmation. Now you can login your account.')
+        # return HttpResponse('Thank you for your email confirmation. Now you can login your account.')
+        return render(request, 'openuser/activation_success.html', {})
     else:
-        return HttpResponse('Activation link is invalid!')
+        return render(request, 'openuser/activation_fail.html', {})
+        # return HttpResponse('Activation link is invalid!')
 
 @login_required
 def user_account(request):
