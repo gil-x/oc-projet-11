@@ -19,11 +19,6 @@
             {% else %}
                 <h1 class="text-uppercase"><strong>Créer un compte</strong></h1>
                 <hr>
-                {% comment %} <form method="post" action=".">
-                    {% csrf_token %}
-                    {{ form.as_p }}
-                    <input class="btn btn-primary btn-xl js-scroll-trigger" type="submit" value="Créer le compte" />
-                </form> {% endcomment %}
                 
                 <form method="post">
                     {% csrf_token %}
@@ -41,25 +36,6 @@
                     {% endfor %}
                     <input class="btn btn-primary btn-xl js-scroll-trigger" type="submit" value="Créer le compte" />
                 </form>
-
-
-                {% comment %} <form method="post">
-                    {% csrf_token %}
-                    {% for field in form %}
-                    <p>
-                        {{ field.label_tag }}<br>
-                        {{ field }}
-                        {% if field.help_text %}
-                        <small style="display: none">{{ field.help_text }}</small>
-                        {% endif %}
-                        {% for error in field.errors %}
-                        <p style="color: red">{{ error }}</p>
-                        {% endfor %}
-                    </p>
-                    {% endfor %}
-                    <button type="submit">Sign up</button>
-                </form> {% endcomment %}
-
 
             {% endif %}
             </div>
