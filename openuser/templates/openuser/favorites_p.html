@@ -8,6 +8,24 @@
     <div id="products-list" class="favorites-container">
         <div id="products-list-head">
             <h1>Mes favoris</h1>
+            <a class="nav-link js-scroll-trigger" href="{% url 'import_favorites' %}">Importer des favoris</a>
+            <a class="nav-link js-scroll-trigger" href="{% url 'export_favorites' %}">Exporter mes favoris</a>
+            <form action="{% url "user_favorites" %}" method="POST" enctype="multipart/form-data" class="form-horizontal"> 
+                    {% csrf_token %}
+                    <div>
+                        <span> - {{ error_message }} - </span>
+                        <label for="name">Fichier JSON de favoris :</label>
+                        <div>
+                            <input type="file" name="json_file" id="json_file" required="True" class="form-control">
+                        </div>                    
+                    </div>
+                    <div class="form-group">                    
+                        <div>
+                            <button>Téléverser</button>
+                        </div> 
+                    </div>
+                </form>
+  
         </div>
         {% for favorite in favorites_p %}
         <div class="product">

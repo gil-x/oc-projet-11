@@ -1,12 +1,12 @@
 {% extends "base.html" %}
 
-{% block title %}Créer un compte{% endblock %}
+{% block title %}Upload fav{% endblock %}
 
 {% block content %}
 
 
 {% if error %}
-<p><strong>Erreur quelque part...</strong></p>
+<p><strong>Erreur queque part...</strong></p>
 {% endif %}
 
 
@@ -16,11 +16,9 @@
             <div id="login-box" class="col-lg-10 mx-auto">
             {% if user.is_authenticated %}
                 <h1>Bonjour {{ user.username }} !</h1>
-            {% else %}
-                <h1 class="text-uppercase"><strong>Créer un compte</strong></h1>
-                <hr>
+            
                 
-                <form method="post">
+                {% comment %} <form method="post">
                     {% csrf_token %}
                     {% for field in form %}
                         <p>
@@ -35,8 +33,25 @@
                         </p>
                     {% endfor %}
                     <input class="btn btn-primary btn-xl js-scroll-trigger" type="submit" value="Créer le compte" />
-                </form>
+                </form> {% endcomment %}
 
+                <form action="{% url "import_favorites" %}" method="POST" enctype="multipart/form-data" class="form-horizontal"> 
+                    {% csrf_token %}
+                    <div>
+                        <label for="name">Fichier JSON de favoris :</label>
+                        <div>
+                            <input type="file" name="json_file" id="json_file" required="True" class="form-control">
+                        </div>                    
+                    </div>
+                    <div class="form-group">                    
+                        <div>
+                            <button>Téléverser</button>
+                        </div> 
+                    </div>
+                </form>
+            {% else %}
+                <h1 class="text-uppercase"><strong>Créer un compte</strong></h1>
+                <hr>
             {% endif %}
             </div>
         </div>

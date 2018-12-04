@@ -16,6 +16,8 @@ from django.template.loader import render_to_string
 from .tokens import account_activation_token
 from django.core.mail import EmailMessage
 
+import json
+
 def registration(request):
     context = {}
 
@@ -189,16 +191,32 @@ def log_out(request):
 
 @login_required
 def user_favorites(request):
+    context = {}
+    # if "GET" == request.method:
+    #     pass
+        # return HttpResponse("OSEF")
+        # return render(request, "openuser/favorites_p.html", data)
+    if request.method == "POST":
+        try:
+            # response = json.dumps(json.loads(request.FILES["json_file"].read()))
+            # response = json.dumps(json.loads(request.FILES["json_file"].read()))
+            for favorite in json.loads(request.FILES["json_file"].read())["favorites"]:
+                    print(favorite["product_name"])
+                    # print(favorite)
+        except UnicodeDecodeError:
+            context["error_message"] = "erreur sur le fichier !"
+        # return HttpResponse(response)
+
     favorites = request.user.profile.products.all()
     paginator = Paginator(favorites, 6)
     page = request.GET.get('page')
     try:
-        favorites_p = paginator.page(page)
+        context["favorites_p"] = paginator.page(page)
     except PageNotAnInteger:
-        favorites_p = paginator.page(1)
+        context["favorites_p"] = paginator.page(1)
     except EmptyPage:
-        favorites_p = paginator.page(paginator.num_pages)
-    return render(request, 'openuser/favorites_p.html', {'favorites_p': favorites_p})
+        context["favorites_p"] = paginator.page(paginator.num_pages)
+    return render(request, 'openuser/favorites_p.html', context)
 
 @login_required
 def add_to_favorites(request, pk):
@@ -227,3 +245,84 @@ def remove_from_favorites(request, pk):
         product_to_remove.save()
     context['to_delete'] = product_to_remove
     return render(request, 'openuser/favorites.html', context)
+
+@login_required
+def export_favorites(request):
+    favorites = {}
+    for favorite in request.user.profile.products.all():
+        print("{} - {} ({})".format(favorite.pk, favorite.product_name, favorite.barcode))
+    # favorites = {
+    #     "favorites": [
+    #         {
+    #             "product_name": "spam",
+    #             "product_brand": "py1",
+    #         },
+    #         {
+    #             "product_name": "eggs",
+    #             "product_brand": "py2",
+    #         }
+    #     ]
+    # }
+    response = HttpResponse(json.dumps(favorites), content_type= "application/json")
+    response['Content-Disposition'] = 'attachment; filename=export.json'
+    return response
+
+@login_required
+def import_favorites(request):
+    data = {}
+    if "GET" == request.method:
+        # return HttpResponse("OSEF")
+        return render(request, "openuser/upload_favorites.html", data)
+    else:
+        response = "ok"
+        try:
+            # response = json.dumps(json.loads(request.FILES["json_file"].read()))
+            # response = json.dumps(json.loads(request.FILES["json_file"].read()))
+            for favorite in json.loads(request.FILES["json_file"].read())["favorites"]:
+                print(favorite["product_name"])
+                # print(favorite)
+        except:
+            pass
+        return HttpResponse(response)
+
+def upload_csv(request):
+	data = {}
+	if "GET" == request.method:
+		return render(request, "myapp/upload_csv.html", data)
+    # if not GET, then proceed
+	try:
+		csv_file = request.FILES["csv_file"]
+		if not csv_file.name.endswith('.csv'):
+			messages.error(request,'File is not CSV type')
+			return HttpResponseRedirect(reverse("myapp:upload_csv"))
+        #if file is too large, return
+		if csv_file.multiple_chunks():
+			messages.error(request,"Uploaded file is too big (%.2f MB)." % (csv_file.size/(1000*1000),))
+			return HttpResponseRedirect(reverse("myapp:upload_csv"))
+
+		file_data = csv_file.read().decode("utf-8")		
+
+		lines = file_data.split("\n")
+		#loop over the lines and save them in db. If error , store as string and then display
+		for line in lines:						
+			fields = line.split(",")
+			data_dict = {}
+			data_dict["name"] = fields[0]
+			data_dict["start_date_time"] = fields[1]
+			data_dict["end_date_time"] = fields[2]
+			data_dict["notes"] = fields[3]
+			try:
+				form = EventsForm(data_dict)
+				if form.is_valid():
+					form.save()					
+				else:
+					logging.getLogger("error_logger").error(form.errors.as_json())												
+			except Exception as e:
+				logging.getLogger("error_logger").error(repr(e))					
+				pass
+
+	except Exception as e:
+		logging.getLogger("error_logger").error("Unable to upload file. "+repr(e))
+		messages.error(request,"Unable to upload file. "+repr(e))
+
+	return HttpResponseRedirect(reverse("myapp:upload_csv"))

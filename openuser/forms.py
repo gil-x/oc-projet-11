@@ -35,3 +35,8 @@ class SignupForm(UserCreationForm):
     class Meta:
         model = User
         fields = ('username', 'email', 'password1', 'password2')
+
+
+class UploadFileForm(forms.Form):
+    title = forms.CharField(max_length=50)
+    json_file = forms.FileField()
