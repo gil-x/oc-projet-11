@@ -79,6 +79,7 @@ TEMPLATES = [
     },
 ]
 
+
 WSGI_APPLICATION = 'pur_beurre.wsgi.application'
 
 DATABASES = {

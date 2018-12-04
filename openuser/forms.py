@@ -11,7 +11,7 @@ class CreateUser(forms.Form):
     username = forms.CharField(label="Nom d'utilisateur ", max_length=30)
     email = forms.EmailField(label="Email ", max_length=30)
     password = forms.CharField(label="Mot de passe ", widget=forms.PasswordInput)
-    password_verification = forms.CharField(label="Mot de passe(verification) ", widget=forms.PasswordInput)
+    password_verification = forms.CharField(label="Mot de passe (vérification) ", widget=forms.PasswordInput)
 
     def clean(self):
         cleaned_data = super(CreateUser, self).clean()
@@ -28,10 +28,9 @@ class CreateUser(forms.Form):
 
         return cleaned_data
 
-
-
 class SignupForm(UserCreationForm):
     email = forms.EmailField(max_length=200, help_text='Required')
+    password2 = forms.CharField(label="Mot de passe (vérification)", widget=forms.PasswordInput)
 
     class Meta:
         model = User
