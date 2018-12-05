@@ -5,12 +5,14 @@ from openfood.models import Category, Product
 from django.contrib.auth import authenticate
 from django.core.urlresolvers import reverse
 from .views import add_to_favorites, remove_from_favorites
-
+from .forms import *
+from django.core import mail
 
 class ProfileTests(TestCase):
     def setUp(self):
         """
-        Appelée une seule fois avant tous les tests. Pour créer de la data, pas des variables.
+        Appelée une seule fois avant tous les tests.
+        Pour créer de la data, pas des variables.
         """
         username = 'jdoe'
         password = 'password'
@@ -91,6 +93,17 @@ class ProfileTests(TestCase):
         request.user = self.user
         response = remove_from_favorites(request, 1)
         self.assertEqual(response.status_code, 200)
+
+    def test_signup_form_valid(self):
+        form = SignupForm(data={ 'username': 'steve', 'email': 'steve@me.org',
+                'password1': 'greatestkey', 'password2': 'greatestkey' })
+        print("mail.outbox:", mail.outbox)
+        self.assertTrue(form.is_valid())
+
+    def test_signup_form_not_valid(self):
+        form = SignupForm(data={ 'username': 'steve', 'email': 'steve@me.org',
+                'password1': 'greatestkey', 'password2': 'NOGREATKEY' })
+        self.assertFalse(form.is_valid())
 
 
     

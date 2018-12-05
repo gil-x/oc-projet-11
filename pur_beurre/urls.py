@@ -35,7 +35,7 @@ urlpatterns = [
     url(r'^mon-espace/', include('openuser.urls')),
     url(r'^mentions-légales/', openfood_views.mentions, name='mentions'),
 
-    url(r'^signup/$', openuser_views.signup, name='signup'),
+    # url(r'^signup/$', openuser_views.signup, name='signup'),
     url(r'^activate/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/$',
         openuser_views.activate, name='activate'),
-] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+]

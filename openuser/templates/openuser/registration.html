@@ -19,7 +19,6 @@
             {% else %}
                 <h1 class="text-uppercase"><strong>Créer un compte</strong></h1>
                 <hr>
-                
                 <form method="post">
                     {% csrf_token %}
                     {% for field in form %}

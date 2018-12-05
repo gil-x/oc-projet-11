@@ -198,3 +198,10 @@ class ProductsTestCase(TestCase):
         response = c.get('/produits/100/substituts/')
         self.assertEqual(response.status_code, 404)
 
+    def test_product_detail(self):
+        """
+        Test display of an existing product, id = 1.
+        """
+        c = Client()
+        response = c.get('/produits/1/')
+        self.assertEqual(response.status_code, 200)
