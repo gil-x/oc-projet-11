@@ -8,26 +8,32 @@
     <div id="products-list" class="favorites-container">
         <div id="products-list-head">
             <h1>Mes favoris</h1>
-            <a class="nav-link js-scroll-trigger" href="{% url 'import_favorites' %}">Importer des favoris</a>
-            <a class="nav-link js-scroll-trigger" href="{% url 'export_favorites' %}">Exporter mes favoris</a>
-            <form action="{% url "user_favorites" %}" method="POST" enctype="multipart/form-data" class="form-horizontal"> 
-                    {% csrf_token %}
-                    <div>
-                        <span> - {{ error_message }} - </span>
-                        <label for="name">Fichier JSON de favoris :</label>
-                        <div>
-                            <input type="file" name="json_file" id="json_file" required="True" class="form-control">
-                        </div>                    
-                    </div>
-                    <div class="form-group">                    
-                        <div>
-                            <button>Téléverser</button>
-                        </div> 
-                    </div>
-                </form>
-  
         </div>
-        {% for favorite in favorites_p %}
+
+        <div id="import-export">
+            <div>
+                {% if favorites %}
+                <a class="favorite-remove btn btn-success" href="{% url 'export_favorites' %}">Exporter mes favoris</a>
+                {% endif %}
+            </div>
+            <form action="{% url "user_favorites" %}" method="POST" enctype="multipart/form-data" class="form-horizontal"> 
+                {% csrf_token %}
+                {% comment %} <label for="name" style="color: #FFF;">Fichier de favoris :</label>
+                <input type="file" name="json_file" id="json_file" required="True">
+                <button class="btn btn-primary">Téléverser</button> {% endcomment %}
+                <div class="custom-file">
+                    <input name="json_file" type="file" class="custom-file-input" id="customFile">
+                    <label class="custom-file-label" for="json_file">Fichier de favoris</label>
+                </div>
+                <button class="btn btn-primary">Téléverser</button>
+                <span id="info-fav">{{ log_message }}</span>
+            </form>
+        </div>
+
+
+        
+
+        {% for favorite in favorites %}
         <div class="product">
             <div class="grade-{{ favorite.grade }}">
                 <p><strong>{{ favorite.product_name }}</strong></p>

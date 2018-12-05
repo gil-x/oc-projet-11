@@ -15,6 +15,7 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.template.loader import render_to_string
 from .tokens import account_activation_token
 from django.core.mail import EmailMessage
+from django.core.exceptions import ObjectDoesNotExist
 
 import json
 
@@ -192,30 +193,30 @@ def log_out(request):
 @login_required
 def user_favorites(request):
     context = {}
-    # if "GET" == request.method:
-    #     pass
-        # return HttpResponse("OSEF")
-        # return render(request, "openuser/favorites_p.html", data)
+    products_added = 0
     if request.method == "POST":
         try:
-            # response = json.dumps(json.loads(request.FILES["json_file"].read()))
-            # response = json.dumps(json.loads(request.FILES["json_file"].read()))
             for favorite in json.loads(request.FILES["json_file"].read())["favorites"]:
-                    print(favorite["product_name"])
-                    # print(favorite)
+                product_to_add = Product.objects.get(pk=favorite["id"])
+                if product_to_add not in request.user.profile.products.all():
+                    request.user.profile.products.add(product_to_add)
+                    product_to_add.favorized += 1
+                    product_to_add.save()
+                    products_added += 1
+            context["log_message"] = str(products_added) + " produit(s) ajouté(s)"
         except UnicodeDecodeError:
-            context["error_message"] = "erreur sur le fichier !"
-        # return HttpResponse(response)
-
+            context["log_message"] = "Problème avec le fichier."
+        except ObjectDoesNotExist:
+            context["log_message"] = "Erreur dans le fichier."
     favorites = request.user.profile.products.all()
     paginator = Paginator(favorites, 6)
     page = request.GET.get('page')
     try:
-        context["favorites_p"] = paginator.page(page)
+        context["favorites"] = paginator.page(page)
     except PageNotAnInteger:
-        context["favorites_p"] = paginator.page(1)
+        context["favorites"] = paginator.page(1)
     except EmptyPage:
-        context["favorites_p"] = paginator.page(paginator.num_pages)
+        context["favorites"] = paginator.page(paginator.num_pages)
     return render(request, 'openuser/favorites_p.html', context)
 
 @login_required
@@ -228,9 +229,6 @@ def add_to_favorites(request, pk):
         request.user.profile.products.add(product_to_add)
         product_to_add.favorized += 1
         product_to_add.save()
-        # print(get_object_or_404(Product, pk=product_to_add.pk))
-        # get_object_or_404(Product, pk=product_to_add.pk).update(favorized=9)
-        
     else:
         context['response'] = "Y a PAS d'produit !"
     return render(request, 'openuser/favorites.html', context)
@@ -248,81 +246,75 @@ def remove_from_favorites(request, pk):
 
 @login_required
 def export_favorites(request):
-    favorites = {}
+    favorites = {"favorites": []}
     for favorite in request.user.profile.products.all():
-        print("{} - {} ({})".format(favorite.pk, favorite.product_name, favorite.barcode))
-    # favorites = {
-    #     "favorites": [
-    #         {
-    #             "product_name": "spam",
-    #             "product_brand": "py1",
-    #         },
-    #         {
-    #             "product_name": "eggs",
-    #             "product_brand": "py2",
-    #         }
-    #     ]
-    # }
+        favorites["favorites"].append(
+            {
+                "id": favorite.pk,
+                "product_name": favorite.product_name,
+                "barcode": favorite.barcode,
+            }
+        )
     response = HttpResponse(json.dumps(favorites), content_type= "application/json")
-    response['Content-Disposition'] = 'attachment; filename=export.json'
+    response['Content-Disposition'] = "attachment; filename={}-favs.json".format(request.user)
     return response
 
-@login_required
-def import_favorites(request):
-    data = {}
-    if "GET" == request.method:
-        # return HttpResponse("OSEF")
-        return render(request, "openuser/upload_favorites.html", data)
-    else:
-        response = "ok"
-        try:
-            # response = json.dumps(json.loads(request.FILES["json_file"].read()))
-            # response = json.dumps(json.loads(request.FILES["json_file"].read()))
-            for favorite in json.loads(request.FILES["json_file"].read())["favorites"]:
-                print(favorite["product_name"])
-                # print(favorite)
-        except:
-            pass
-        return HttpResponse(response)
+# @login_required
+# def import_favorites(request):
+#     data = {}
+#     if "GET" == request.method:
+#         # return HttpResponse("OSEF")
+#         return render(request, "openuser/upload_favorites.html", data)
+#     else:
+#         response = "ok"
+#         try:
+#             # response = json.dumps(json.loads(request.FILES["json_file"].read()))
+#             # response = json.dumps(json.loads(request.FILES["json_file"].read()))
+#             for favorite in json.loads(request.FILES["json_file"].read())["favorites"]:
+#                 print(favorite["product_name"])
+#                 # print(favorite)
+#         except:
+#             pass
+#         return HttpResponse(response)
 
-def upload_csv(request):
-	data = {}
-	if "GET" == request.method:
-		return render(request, "myapp/upload_csv.html", data)
-    # if not GET, then proceed
-	try:
-		csv_file = request.FILES["csv_file"]
-		if not csv_file.name.endswith('.csv'):
-			messages.error(request,'File is not CSV type')
-			return HttpResponseRedirect(reverse("myapp:upload_csv"))
-        #if file is too large, return
-		if csv_file.multiple_chunks():
-			messages.error(request,"Uploaded file is too big (%.2f MB)." % (csv_file.size/(1000*1000),))
-			return HttpResponseRedirect(reverse("myapp:upload_csv"))
+# def upload_csv(request):
+# 	data = {}
+# 	if "GET" == request.method:
+# 		return render(request, "myapp/upload_csv.html", data)
+#     # if not GET, then proceed
+# 	try:
+# 		csv_file = request.FILES["csv_file"]
+# 		if not csv_file.name.endswith('.csv'):
+# 			messages.error(request,'File is not CSV type')
+# 			return HttpResponseRedirect(reverse("myapp:upload_csv"))
+#         #if file is too large, return
+# 		if csv_file.multiple_chunks():
+# 			messages.error(request,"Uploaded file is too big (%.2f MB)." % (csv_file.size/(1000*1000),))
+# 			return HttpResponseRedirect(reverse("myapp:upload_csv"))
 
-		file_data = csv_file.read().decode("utf-8")		
+# 		file_data = csv_file.read().decode("utf-8")		
 
-		lines = file_data.split("\n")
-		#loop over the lines and save them in db. If error , store as string and then display
-		for line in lines:						
-			fields = line.split(",")
-			data_dict = {}
-			data_dict["name"] = fields[0]
-			data_dict["start_date_time"] = fields[1]
-			data_dict["end_date_time"] = fields[2]
-			data_dict["notes"] = fields[3]
-			try:
-				form = EventsForm(data_dict)
-				if form.is_valid():
-					form.save()					
-				else:
-					logging.getLogger("error_logger").error(form.errors.as_json())												
-			except Exception as e:
-				logging.getLogger("error_logger").error(repr(e))					
-				pass
+# 		lines = file_data.split("\n")
+# 		#loop over the lines and save them in db. If error , store as string and then display
+# 		for line in lines:						
+# 			fields = line.split(",")
+# 			data_dict = {}
+# 			data_dict["name"] = fields[0]
+# 			data_dict["start_date_time"] = fields[1]
+# 			data_dict["end_date_time"] = fields[2]
+# 			data_dict["notes"] = fields[3]
+# 			try:
+# 				form = EventsForm(data_dict)
+# 				if form.is_valid():
+# 					form.save()					
+# 				else:
+# 					logging.getLogger("error_logger").error(form.errors.as_json())												
+# 			except Exception as e:
+# 				logging.getLogger("error_logger").error(repr(e))					
+# 				pass
 
-	except Exception as e:
-		logging.getLogger("error_logger").error("Unable to upload file. "+repr(e))
-		messages.error(request,"Unable to upload file. "+repr(e))
+# 	except Exception as e:
+# 		logging.getLogger("error_logger").error("Unable to upload file. "+repr(e))
+# 		messages.error(request,"Unable to upload file. "+repr(e))
 
-	return HttpResponseRedirect(reverse("myapp:upload_csv"))
+# 	return HttpResponseRedirect(reverse("myapp:upload_csv"))

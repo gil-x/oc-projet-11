@@ -189,7 +189,28 @@ header.masthead h1 {
 header.masthead p {
   font-weight: 300;
 }
-
+#import-export {
+  height: 10vh;
+  flex-basis: 100%;
+  background: rgba(255,250,215,0.29);
+  border-radius: 0 0 3px 3px;
+  transform: translateY(-5px);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+}
+#json_file, #json_file ~ button {
+  display: inline;
+}
+#import-export form {
+  display: flex;
+}
+#import-export form button {
+  margin: 0 1em;
+}
+#info-fav {
+  color: #FFF;
+}
 @media (min-width: 768px) {
   header.masthead p {
     font-size: 1.15rem;
