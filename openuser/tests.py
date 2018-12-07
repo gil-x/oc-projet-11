@@ -1,12 +1,14 @@
-from django.test import RequestFactory, TestCase, Client
+from django.test import RequestFactory, TestCase, Client  
+# from django.test import force_login
 from django.contrib.auth.models import AnonymousUser, User
 from .models import Profile
 from openfood.models import Category, Product
-from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate, login, logout
 from django.core.urlresolvers import reverse
 from .views import add_to_favorites, remove_from_favorites
 from .forms import *
 from django.core import mail
+import json
 
 class ProfileTests(TestCase):
     def setUp(self):
@@ -97,7 +99,9 @@ class ProfileTests(TestCase):
     def test_signup_form_valid(self):
         form = SignupForm(data={ 'username': 'steve', 'email': 'steve@me.org',
                 'password1': 'greatestkey', 'password2': 'greatestkey' })
-        print("mail.outbox:", mail.outbox)
+        # print("mail.outbox:", mail.outbox)
+        #assertEqual mail size
+        # il faut tester la vue !
         self.assertTrue(form.is_valid())
 
     def test_signup_form_not_valid(self):
@@ -105,5 +109,12 @@ class ProfileTests(TestCase):
                 'password1': 'greatestkey', 'password2': 'NOGREATKEY' })
         self.assertFalse(form.is_valid())
 
-
-    
+    def test_export_fav(self):
+        c = Client()
+        c.force_login(self.user, backend=None)
+        request = self.factory.get('/mon-espace/add-product/1/')
+        request.user = self.user
+        response = add_to_favorites(request, 1)
+        response = c.get('/mon-espace/export-favorites/')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.content, b'{"favorites": [{"id": 1, "product_name": "egg", "barcode": "0123456789123"}]}')
